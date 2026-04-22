@@ -1,0 +1,206 @@
+generator client {
+  provider               = "prisma-client"
+  output                 = "../src/generated/prisma"
+  runtime                = "nodejs"
+  moduleFormat           = "cjs"
+  generatedFileExtension = "ts"
+  importFileExtension    = ""
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ─── Users ───────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         UserRole @default(OWNER)
+  city         String?
+  latitude     Float?
+  longitude    Float?
+  avatarUrl    String?
+  isVerified   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  animals          Animal[]
+  donationRequests DonationRequest[]
+  sentMessages     Message[]          @relation("SentMessages")
+  receivedMessages Message[]          @relation("ReceivedMessages")
+  refreshTokens    RefreshToken[]
+
+  @@index([city])
+  @@index([role])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique @db.VarChar(500)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+enum UserRole {
+  OWNER
+  CLINIC
+  VOLUNTEER
+  ADMIN
+}
+
+model Partner {
+  id              Int         @id @default(autoincrement())
+  rank            PartnerRank
+  title           String
+  imageUrl        String      @map("image_url") @db.VarChar(2048)
+  type            PartnerType
+  bloodDonations  Int         @map("blood_donations")
+  plasmaDonations Int         @map("plasma_donations")
+
+  @@index([rank])
+  @@index([type])
+  @@index([title])
+  @@map("partners")
+}
+
+enum PartnerRank {
+  LEGENDARY_DONOR
+  RELIABLE_ASSISTANT
+}
+
+enum PartnerType {
+  VETERINARY_CLINIC
+  SHELTER
+}
+
+model Donor {
+  id              String @id @default(uuid())
+  imageUrl        String @map("image_url") @db.VarChar(2048)
+  title           String
+  address         String
+  bloodDonations  Int    @map("blood_donations")
+  plasmaDonations Int    @map("plasma_donations")
+
+  @@index([title])
+  @@index([address])
+  @@map("donors")
+}
+
+// ─── Animals ─────────────────────────────────────────────
+
+model Animal {
+  id             String    @id @default(uuid())
+  ownerId        String
+  owner          User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name           String
+  type           AnimalType
+  breed          String?
+  weight         Float?
+  age            Int?       // age in months
+  bloodType      String?    @db.VarChar(20)
+  isDonor        Boolean    @default(false)
+  isVaccinated   Boolean    @default(false)
+  healthNotes    String?    @db.Text
+  photoUrl       String?
+  lastDonationAt DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  donationResponses DonationResponse[]
+
+  @@index([ownerId])
+  @@index([type, bloodType, isDonor])
+  @@index([isDonor])
+}
+
+enum AnimalType {
+  DOG
+  CAT
+}
+
+// ─── Donation Requests ───────────────────────────────────
+
+model DonationRequest {
+  id          String        @id @default(uuid())
+  requesterId String
+  requester   User          @relation(fields: [requesterId], references: [id], onDelete: Cascade)
+  animalType  AnimalType
+  bloodType   String        @db.VarChar(20)
+  urgency     Urgency       @default(NORMAL)
+  status      RequestStatus @default(OPEN)
+  description String?       @db.Text
+  city        String?
+  latitude    Float?
+  longitude   Float?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  responses DonationResponse[]
+
+  @@index([requesterId])
+  @@index([status, animalType, bloodType])
+  @@index([urgency])
+}
+
+enum Urgency {
+  LOW
+  NORMAL
+  HIGH
+  CRITICAL
+}
+
+enum RequestStatus {
+  OPEN
+  IN_PROGRESS
+  FULFILLED
+  CANCELLED
+}
+
+// ─── Donation Responses ──────────────────────────────────
+
+model DonationResponse {
+  id            String         @id @default(uuid())
+  requestId     String
+  request       DonationRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  donorAnimalId String
+  donorAnimal   Animal         @relation(fields: [donorAnimalId], references: [id], onDelete: Cascade)
+  status        ResponseStatus @default(PENDING)
+  message       String?        @db.Text
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([requestId])
+  @@index([donorAnimalId])
+}
+
+enum ResponseStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+// ─── Messages ────────────────────────────────────────────
+
+model Message {
+  id         String   @id @default(uuid())
+  senderId   String
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  content    String   @db.Text
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([receiverId, isRead])
+}

@@ -1,0 +1,5 @@
+ALTER TABLE `partners`
+  MODIFY `image_url` VARCHAR(2048) NOT NULL;
+
+ALTER TABLE `donors`
+  MODIFY `image_url` VARCHAR(2048) NOT NULL;
