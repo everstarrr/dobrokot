@@ -5,7 +5,7 @@ import { HeroSectionDesktop } from "./ui/HeroSectionDesktop";
 import { HowItWorksSection } from "./ui/HowItWorksSection";
 import { PartnersSection } from "./ui/PartnersSection";
 
-export function MainPage() {
+function MainPage() {
   return (
     <main className="flex flex-col sm:gap-10 gap-20">
       <HeroSection />

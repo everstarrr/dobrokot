@@ -67,9 +67,9 @@ const results = [
   },
 ] as const;
 
-export function ResultsPage() {
+function ResultsPage() {
   return (
-    <main className="flex flex-col pb-5 sm:pb-15 rounded-t-3xl bg-background pt-5 sm:mx-auto sm:max-w-[calc(100%-16px)]">
+    <main className="flex flex-col gap-3 sm:gap-15 pb-5 sm:pb-15 rounded-t-3xl bg-background pt-5 sm:mx-auto sm:max-w-[calc(100%-16px)]">
       <div className="flex flex-col items-center gap-2.5 text-center">
         <div className="flex flex-col items-center">
           <Badge>Донорство</Badge>

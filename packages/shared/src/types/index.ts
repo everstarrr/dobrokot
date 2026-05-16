@@ -1,7 +1,6 @@
 export enum UserRole {
   OWNER = "OWNER",
   CLINIC = "CLINIC",
-  VOLUNTEER = "VOLUNTEER",
   ADMIN = "ADMIN",
 }
 
@@ -26,26 +25,6 @@ export enum CatBloodType {
   AB = "AB",
 }
 
-export enum Urgency {
-  LOW = "LOW",
-  NORMAL = "NORMAL",
-  HIGH = "HIGH",
-  CRITICAL = "CRITICAL",
-}
-
-export enum RequestStatus {
-  OPEN = "OPEN",
-  IN_PROGRESS = "IN_PROGRESS",
-  FULFILLED = "FULFILLED",
-  CANCELLED = "CANCELLED",
-}
-
-export enum ResponseStatus {
-  PENDING = "PENDING",
-  ACCEPTED = "ACCEPTED",
-  REJECTED = "REJECTED",
-}
-
 export enum PartnerRank {
   LEGENDARY_DONOR = "LEGENDARY_DONOR",
   RELIABLE_ASSISTANT = "RELIABLE_ASSISTANT",
@@ -54,6 +33,32 @@ export enum PartnerRank {
 export enum PartnerType {
   VETERINARY_CLINIC = "VETERINARY_CLINIC",
   SHELTER = "SHELTER",
+}
+
+export enum SubscriptionPlan {
+  WEEK = "WEEK",
+  MONTH = "MONTH",
+}
+
+export enum BloodInventoryStatus {
+  AVAILABLE = "AVAILABLE",
+  RESERVED = "RESERVED",
+  USED = "USED",
+  EXPIRED = "EXPIRED",
+}
+
+export enum ClinicVerificationStatus {
+  PENDING = "PENDING",
+  VERIFIED = "VERIFIED",
+  REJECTED = "REJECTED",
+}
+
+export enum PartnershipRequestStatus {
+  NEW = "NEW",
+  IN_REVIEW = "IN_REVIEW",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+  ARCHIVED = "ARCHIVED",
 }
 
 export interface ApiResponse<T = unknown> {
@@ -86,40 +91,6 @@ export interface UserPublic {
   createdAt: string;
 }
 
-export interface AnimalPublic {
-  id: string;
-  name: string;
-  type: AnimalType;
-  breed: string | null;
-  weight: number | null;
-  age: number | null;
-  bloodType: string | null;
-  isDonor: boolean;
-  isVaccinated: boolean;
-  photoUrl: string | null;
-  owner: {
-    id: string;
-    name: string;
-    city: string | null;
-  };
-}
-
-export interface DonationRequestPublic {
-  id: string;
-  animalType: AnimalType;
-  bloodType: string;
-  urgency: Urgency;
-  status: RequestStatus;
-  description: string | null;
-  city: string | null;
-  requester: {
-    id: string;
-    name: string;
-  };
-  createdAt: string;
-  responsesCount: number;
-}
-
 export interface Partner {
   id: number;
   rank: PartnerRank;
@@ -141,3 +112,47 @@ export interface Donor {
 
 export type PartnerPublic = Partner;
 export type DonorPublic = Donor;
+
+export interface SubscriptionState {
+  plan: SubscriptionPlan | null;
+  expiresAt: string | null;
+  isActive: boolean;
+}
+
+export interface ClinicPublic {
+  id: string;
+  userId: string;
+  title: string;
+  description: string | null;
+  phone: string | null;
+  email: string | null;
+  websiteUrl: string | null;
+  address: string | null;
+  city: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  workingHours: string | null;
+  licenseNo: string | null;
+  avatarUrl: string | null;
+  verificationStatus: ClinicVerificationStatus;
+}
+
+export interface BloodInventoryPublic {
+  id: string;
+  clinicId: string;
+  animalType: AnimalType;
+  bloodType: string;
+  volumeMl: number | null;
+  unitsCount: number;
+  donationDate: string | null;
+  expiresAt: string | null;
+  status: BloodInventoryStatus;
+  notes: string | null;
+}
+
+export interface BloodSearchClinicResult {
+  clinic: ClinicPublic;
+  matchedUnits: number;
+  totalVolumeMl: number;
+  distanceKm: number | null;
+}

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm exec *)",
+      "Bash(Find c:/DATA/GitHub/Development/dobrokot/apps/web/src -type f \\\\\\( -name \"*.ts\" -o -name \"*.tsx\" \\\\\\) -exec grep -l \"dobrokot/shared\\\\|from.*shared\\\\|dobrokot/types\" {} \\\\;)",
+      "Bash(Find c:/DATA/GitHub/Development/dobrokot/apps/web/src -type f \\\\\\( -name \"*.ts\" -o -name \"*.tsx\" \\\\\\))",
+      "Bash(pnpm install *)"
+    ]
+  }
+}

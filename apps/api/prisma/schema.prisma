@@ -14,28 +14,33 @@ datasource db {
 // ─── Users ───────────────────────────────────────────────
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String
-  name         String
-  phone        String?
-  role         UserRole @default(OWNER)
-  city         String?
-  latitude     Float?
-  longitude    Float?
-  avatarUrl    String?
-  isVerified   Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                    String            @id @default(uuid())
+  email                 String            @unique
+  passwordHash          String
+  name                  String
+  phone                 String?
+  role                  UserRole          @default(OWNER)
+  city                  String?
+  latitude              Float?
+  longitude             Float?
+  avatarUrl             String?
+  isVerified            Boolean           @default(false)
+  subscriptionPlan      SubscriptionPlan?
+  subscriptionExpiresAt DateTime?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
 
-  animals          Animal[]
-  donationRequests DonationRequest[]
-  sentMessages     Message[]          @relation("SentMessages")
-  receivedMessages Message[]          @relation("ReceivedMessages")
-  refreshTokens    RefreshToken[]
+  refreshTokens RefreshToken[]
+  clinic        Clinic?
 
   @@index([city])
   @@index([role])
+  @@index([subscriptionExpiresAt])
+}
+
+enum SubscriptionPlan {
+  WEEK
+  MONTH
 }
 
 model RefreshToken {
@@ -53,8 +58,12 @@ model RefreshToken {
 enum UserRole {
   OWNER
   CLINIC
-  VOLUNTEER
   ADMIN
+}
+
+enum AnimalType {
+  DOG
+  CAT
 }
 
 model Partner {
@@ -95,112 +104,95 @@ model Donor {
   @@map("donors")
 }
 
-// ─── Animals ─────────────────────────────────────────────
+// ─── Clinics ─────────────────────────────────────────────
 
-model Animal {
-  id             String    @id @default(uuid())
-  ownerId        String
-  owner          User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  name           String
-  type           AnimalType
-  breed          String?
-  weight         Float?
-  age            Int?       // age in months
-  bloodType      String?    @db.VarChar(20)
-  isDonor        Boolean    @default(false)
-  isVaccinated   Boolean    @default(false)
-  healthNotes    String?    @db.Text
-  photoUrl       String?
-  lastDonationAt DateTime?
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+model Clinic {
+  id                 String                   @id @default(uuid())
+  userId             String                   @unique
+  user               User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title              String                   @db.VarChar(191)
+  description        String?                  @db.Text
+  phone              String?                  @db.VarChar(32)
+  contactEmail       String?                  @db.VarChar(191)
+  websiteUrl         String?                  @db.VarChar(2048)
+  address            String?                  @db.VarChar(255)
+  city               String?                  @db.VarChar(100)
+  latitude           Float?
+  longitude          Float?
+  workingHours       String?                  @db.VarChar(255)
+  licenseNo          String?                  @db.VarChar(100)
+  verificationStatus ClinicVerificationStatus @default(PENDING)
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
 
-  donationResponses DonationResponse[]
+  bloodInventory BloodInventory[]
 
-  @@index([ownerId])
-  @@index([type, bloodType, isDonor])
-  @@index([isDonor])
+  @@index([city])
+  @@index([title])
+  @@index([verificationStatus])
 }
 
-enum AnimalType {
-  DOG
-  CAT
-}
-
-// ─── Donation Requests ───────────────────────────────────
-
-model DonationRequest {
-  id          String        @id @default(uuid())
-  requesterId String
-  requester   User          @relation(fields: [requesterId], references: [id], onDelete: Cascade)
-  animalType  AnimalType
-  bloodType   String        @db.VarChar(20)
-  urgency     Urgency       @default(NORMAL)
-  status      RequestStatus @default(OPEN)
-  description String?       @db.Text
-  city        String?
-  latitude    Float?
-  longitude   Float?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-
-  responses DonationResponse[]
-
-  @@index([requesterId])
-  @@index([status, animalType, bloodType])
-  @@index([urgency])
-}
-
-enum Urgency {
-  LOW
-  NORMAL
-  HIGH
-  CRITICAL
-}
-
-enum RequestStatus {
-  OPEN
-  IN_PROGRESS
-  FULFILLED
-  CANCELLED
-}
-
-// ─── Donation Responses ──────────────────────────────────
-
-model DonationResponse {
-  id            String         @id @default(uuid())
-  requestId     String
-  request       DonationRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  donorAnimalId String
-  donorAnimal   Animal         @relation(fields: [donorAnimalId], references: [id], onDelete: Cascade)
-  status        ResponseStatus @default(PENDING)
-  message       String?        @db.Text
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-
-  @@index([requestId])
-  @@index([donorAnimalId])
-}
-
-enum ResponseStatus {
+enum ClinicVerificationStatus {
   PENDING
-  ACCEPTED
+  VERIFIED
   REJECTED
 }
 
-// ─── Messages ────────────────────────────────────────────
+// ─── Blood Inventory ─────────────────────────────────────
 
-model Message {
-  id         String   @id @default(uuid())
-  senderId   String
-  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  receiverId String
-  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
-  content    String   @db.Text
-  isRead     Boolean  @default(false)
-  createdAt  DateTime @default(now())
+model BloodInventory {
+  id           String               @id @default(uuid())
+  clinicId     String
+  clinic       Clinic               @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  animalType   AnimalType
+  bloodType    String               @db.VarChar(20)
+  volumeMl     Float?
+  unitsCount   Int                  @default(1)
+  donationDate DateTime?
+  expiresAt    DateTime?
+  status       BloodInventoryStatus @default(AVAILABLE)
+  notes        String?              @db.Text
+  donorRef     String?              @db.VarChar(191)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
 
-  @@index([senderId])
-  @@index([receiverId])
-  @@index([receiverId, isRead])
+  @@index([clinicId])
+  @@index([animalType, bloodType, status])
+  @@index([expiresAt])
+}
+
+enum BloodInventoryStatus {
+  AVAILABLE
+  RESERVED
+  USED
+  EXPIRED
+}
+
+// ─── Partnership Requests ────────────────────────────────
+
+model PartnershipRequest {
+  id                String                   @id @default(uuid())
+  contactName       String                   @db.VarChar(191)
+  contactEmail      String                   @db.VarChar(191)
+  contactPhone      String?                  @db.VarChar(32)
+  clinicTitle       String                   @db.VarChar(191)
+  city              String?                  @db.VarChar(100)
+  message           String?                  @db.Text
+  status            PartnershipRequestStatus @default(NEW)
+  processedAt       DateTime?
+  processedBy       String?
+  provisionedUserId String?
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+
+  @@index([status])
+  @@index([contactEmail])
+}
+
+enum PartnershipRequestStatus {
+  NEW
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  ARCHIVED
 }

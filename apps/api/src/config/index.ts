@@ -11,10 +11,6 @@ export const config = {
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d",
   },
 
-  redis: {
-    url: process.env.REDIS_URL || "redis://localhost:6379",
-  },
-
   smtp: {
     host: process.env.SMTP_HOST || "",
     port: parseInt(process.env.SMTP_PORT || "587", 10),

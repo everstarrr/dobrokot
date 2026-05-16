@@ -21,7 +21,7 @@ export async function register(input: RegisterInput) {
       passwordHash,
       name: input.name,
       phone: input.phone,
-      role: input.role,
+      role: UserRole.OWNER,
       city: input.city,
     },
     select: { id: true, email: true, name: true, role: true },

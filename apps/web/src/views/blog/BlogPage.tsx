@@ -76,7 +76,7 @@ const articles = [
   },
 ] as const;
 
-export function BlogPage() {
+function BlogPage() {
   return (
     <main className="flex flex-col gap-5 sm:gap-15 rounded-t-3xl bg-background pt-5 sm:max-w-[calc(100%-16px)] sm:mx-auto">
       <div className="flex flex-col items-center gap-2.5 text-center">

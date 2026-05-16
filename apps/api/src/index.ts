@@ -6,7 +6,6 @@ import { config } from "./config";
 import { errorHandler } from "./middleware/errorHandler";
 import { router } from "./routes";
 import { prisma } from "./lib/prisma";
-import { redis } from "./lib/redis";
 
 const app: Express = express();
 
@@ -32,9 +31,6 @@ async function main() {
   try {
     await prisma.$connect();
     console.log("✓ Database connected");
-
-    await redis.connect();
-    console.log("✓ Redis connected");
 
     app.listen(config.port, () => {
       console.log(`✓ Server running on port ${config.port}`);

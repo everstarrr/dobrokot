@@ -16,7 +16,6 @@ export const registerSchema = z.object({
     .string()
     .regex(/^\+?[0-9]{10,15}$/, "Некорректный номер телефона")
     .optional(),
-  role: userRoleSchema.default(UserRole.OWNER),
   city: z.string().max(100).optional(),
 });
 
