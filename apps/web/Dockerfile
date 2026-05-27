@@ -1,5 +1,7 @@
-FROM node:20-alpine AS base
-RUN corepack enable && corepack prepare pnpm@10.33.0 --activate
+FROM node:22-alpine AS base
+# pnpm version is pinned in root package.json `packageManager`;
+# corepack picks it up automatically when pnpm is invoked inside the project.
+RUN corepack enable
 
 # --- Dependencies ---
 FROM base AS deps

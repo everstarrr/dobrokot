@@ -15,30 +15,197 @@
 
 ## 0. Требования к серверу
 
-- Ubuntu 22.04+ / Debian 12+
+- Ubuntu 22.04+ / Debian 12+ (далее команды для Ubuntu; на Debian идентично)
 - 2 vCPU / 4 GB RAM / 30 GB SSD (минимум)
-- Docker Engine 24+ и плагин `docker compose`
-- Открытые порты 80/443 наружу (фронт + API проксируем через Nginx/Caddy);
-  3306/4000/3000 контейнеров наружу выставлять не нужно
-- Доменные имена с DNS на сервер: `dobrokot.ru` (фронт) и `api.dobrokot.ru` (API)
+- DNS у двух доменов проброшен на сервер: `dobrokot.ru` (фронт),
+  `api.dobrokot.ru` (API)
+- Доступ по SSH под `root` (если будете деплоить под другим пользователем —
+  выполняйте все команды ниже через `sudo`)
 
-Проверить, что Docker работает:
+> Деплой под root — компромисс для одного небольшого сервера: меньше шагов,
+> не нужно возиться с группами `docker`/`sudo`. На больших инсталляциях лучше
+> завести отдельного пользователя без shell-доступа и ограничить root по SSH.
+
+Что будем ставить на хост:
+
+| Служба | Зачем |
+|---|---|
+| Docker Engine 24+ | контейнеры всего стека (MySQL/API/Web через `docker compose`) |
+| Docker Compose plugin | оркестрация `docker-compose.prod.yml` (идёт вместе с Docker CE) |
+| Nginx | HTTPS-прокси перед контейнерами `web`/`api` |
+| Certbot | бесплатные TLS-сертификаты Let's Encrypt |
+| UFW | системный firewall, режем всё кроме 22/80/443 |
+| Fail2ban | защита SSH от перебора |
+| Git, curl, gnupg, jq, unzip | базовый CLI-инструментарий и `apt`-source для Docker |
+
+> Сами MySQL/Node не ставятся на хост — они живут в контейнерах. На хосте
+> только то, что обслуживает контейнеры снаружи (прокси, firewall, бэкапы).
+
+---
+
+## 0.1. Базовая настройка хоста
+
+Все команды ниже — из-под `root` (если зашли иначе, перейдите через `sudo -i`).
+
+```bash
+apt update && apt upgrade -y
+timedatectl set-timezone Europe/Moscow      # или нужный TZ
+apt install -y locales
+locale-gen ru_RU.UTF-8 en_US.UTF-8
+update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+```
+
+Жёстко рекомендуется: при входе под root оставить **только** аутентификацию
+по ssh-ключу, отключить парольный вход:
+
+```bash
+sed -i \
+  -e 's/^#\?PermitRootLogin.*/PermitRootLogin prohibit-password/' \
+  -e 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' \
+  /etc/ssh/sshd_config
+systemctl restart ssh
+```
+
+Включить swap (если на VPS меньше 8 GB RAM):
+
+```bash
+fallocate -l 2G /swapfile
+chmod 600 /swapfile
+mkswap /swapfile && swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
+```
+
+---
+
+## 0.2. Базовые пакеты, firewall и Fail2ban
+
+```bash
+apt install -y ca-certificates curl gnupg lsb-release git ufw fail2ban jq unzip
+```
+
+UFW:
+
+```bash
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow OpenSSH
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw --force enable
+ufw status verbose
+```
+
+Fail2ban оставляем с дефолтным `sshd`-jail-ом:
+
+```bash
+systemctl enable --now fail2ban
+fail2ban-client status
+```
+
+---
+
+## 0.3. Docker Engine + Docker Compose
+
+Ставим официальный репозиторий Docker (а не `docker.io` из ubuntu-репо —
+он отстаёт по версиям и не включает плагин `compose`):
+
+```bash
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+  gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+chmod a+r /etc/apt/keyrings/docker.gpg
+
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+   https://download.docker.com/linux/ubuntu \
+   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+  > /etc/apt/sources.list.d/docker.list
+
+apt update
+apt install -y docker-ce docker-ce-cli containerd.io \
+                docker-buildx-plugin docker-compose-plugin
+```
+
+> Для Debian 12 заменить `ubuntu` на `debian` в обоих URL и в репозитории.
+
+Проверка:
+
+```bash
+docker run --rm hello-world
+docker compose version
+```
+
+(под root в группу `docker` добавлять никого не надо — root уже имеет полный
+доступ к сокету `/var/run/docker.sock`).
+
+Включить лимит логов (иначе `json-file` забьёт диск), создать
+`/etc/docker/daemon.json`:
+
+```bash
+cat > /etc/docker/daemon.json <<'JSON'
+{
+  "log-driver": "json-file",
+  "log-opts": { "max-size": "10m", "max-file": "5" },
+  "live-restore": true
+}
+JSON
+systemctl restart docker
+```
+
+---
+
+## 0.4. Nginx + Certbot
+
+```bash
+apt install -y nginx
+systemctl enable --now nginx
+# certbot из snap'а (актуальная версия с плагином для nginx):
+apt install -y snapd
+snap install core && snap refresh core
+snap install --classic certbot
+ln -sf /snap/bin/certbot /usr/bin/certbot
+```
+
+Проверить, что Nginx отвечает:
+
+```bash
+curl -I http://localhost/
+```
+
+Конфиг vhost-ов и выпуск сертификатов идёт ниже, в **шаге 3**, после того
+как контейнеры подняты.
+
+---
+
+## 0.5. Проверка готовности окружения
 
 ```bash
 docker --version && docker compose version
+nginx -v
+certbot --version
+ufw status
+fail2ban-client status sshd
+free -h && df -h /
 ```
+
+Всё должно отвечать без ошибок и UFW — `Status: active` с открытыми `22/tcp`,
+`80/tcp`, `443/tcp`.
 
 ---
 
 ## 1. Подготовка кода и секретов
 
 ```bash
-sudo mkdir -p /srv/dobrokot && sudo chown $USER /srv/dobrokot
-cd /srv/dobrokot
+mkdir -p /root/dobrokot
+cd /root/dobrokot
 git clone <repo-url> .
 git checkout master                 # или нужный релизный тег
 cp .env.example .env.production
 ```
+
+> Если хочется хранить вне `/root` — `mkdir -p /srv/dobrokot && cd /srv/dobrokot`
+> работает так же. В шагах ниже путь не зашит, важно только остаться в этой
+> директории.
 
 Отредактировать `.env.production`. Обязательные значения:
 
@@ -132,9 +299,9 @@ server {
 ```
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/dobrokot /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl reload nginx
-sudo certbot --nginx -d dobrokot.ru -d api.dobrokot.ru
+ln -s /etc/nginx/sites-available/dobrokot /etc/nginx/sites-enabled/
+nginx -t && systemctl reload nginx
+certbot --nginx -d dobrokot.ru -d api.dobrokot.ru
 ```
 
 ---
@@ -146,27 +313,28 @@ sudo certbot --nginx -d dobrokot.ru -d api.dobrokot.ru
 или ручной `docker volume rm`. Поэтому перед каждым релизом — дамп.
 
 ```bash
-mkdir -p /srv/dobrokot/backups
+mkdir -p /root/dobrokot/backups
 TS=$(date +%F_%H%M%S)
+cd /root/dobrokot
 docker compose --env-file .env.production -f docker-compose.prod.yml \
   exec -T mysql sh -c \
   'exec mysqldump --single-transaction --routines --triggers --default-character-set=utf8mb4 \
     -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE"' \
-  | gzip > "/srv/dobrokot/backups/dobrokot_${TS}.sql.gz"
+  | gzip > "/root/dobrokot/backups/dobrokot_${TS}.sql.gz"
 ```
 
 Проверить, что дамп не пустой и UTF-8:
 
 ```bash
-gunzip -c /srv/dobrokot/backups/dobrokot_${TS}.sql.gz | head -50
-ls -lh /srv/dobrokot/backups/ | tail -5
+gunzip -c /root/dobrokot/backups/dobrokot_${TS}.sql.gz | head -50
+ls -lh /root/dobrokot/backups/ | tail -5
 ```
 
 Хранить минимум последние 7 ежедневных дампов. Под крон:
 
 ```cron
 # /etc/cron.d/dobrokot-backup  (минута час день месяц день_недели)
-0 3 * * * root /srv/dobrokot/scripts/backup.sh >> /var/log/dobrokot-backup.log 2>&1
+0 3 * * * root /root/dobrokot/scripts/backup.sh >> /var/log/dobrokot-backup.log 2>&1
 ```
 
 Дополнительно — копировать дампы за пределы сервера (rsync/S3/Yandex Object
@@ -177,7 +345,7 @@ Storage) хотя бы раз в сутки.
 ## 5. Релиз новой версии (с сохранением данных)
 
 ```bash
-cd /srv/dobrokot
+cd /root/dobrokot
 
 # 5.1 — сделать бэкап (см. шаг 4)
 ./scripts/backup.sh                  # или скопировать вручную из шага 4
@@ -249,7 +417,7 @@ docker compose --env-file .env.production -f docker-compose.prod.yml \
   stop api web
 
 # Восстановить дамп
-gunzip -c /srv/dobrokot/backups/dobrokot_<TS>.sql.gz | \
+gunzip -c /root/dobrokot/backups/dobrokot_<TS>.sql.gz | \
   docker compose --env-file .env.production -f docker-compose.prod.yml \
     exec -T mysql sh -c \
     'exec mysql --default-character-set=utf8mb4 -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE"'
