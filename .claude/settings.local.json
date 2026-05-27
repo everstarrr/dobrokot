@@ -53,7 +53,8 @@
       "Bash(pnpm --filter @dobrokot/api db:generate)",
       "Bash(timeout 3 bash -c 'echo > /dev/tcp/127.0.0.1/3306 && echo open || echo closed')",
       "Bash(mysql -u dobrokot -pdobrokot_pass --protocol=TCP -h 127.0.0.1 -P 3306 dobrokot --default-character-set=utf8mb4 -e \"SET NAMES utf8mb4; SELECT title, \\\\`rank\\\\`, blood_donations, plasma_donations FROM donors;\")",
-      "Bash(curl -sS \"http://127.0.0.1:4000/api/donors?page=1&limit=24\" --max-time 10)"
+      "Bash(curl -sS \"http://127.0.0.1:4000/api/donors?page=1&limit=24\" --max-time 10)",
+      "Bash(pnpm --filter @dobrokot/web build)"
     ]
   }
 }
