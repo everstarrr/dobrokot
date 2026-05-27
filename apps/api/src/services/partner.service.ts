@@ -76,8 +76,9 @@ export async function deletePartner(id: number) {
 }
 
 export async function getDonors(query: ListDonorsQueryInput) {
-  const { search, page, limit } = query;
+  const { rank, search, page, limit } = query;
   const where = {
+    ...(rank && { rank }),
     ...(search && {
       OR: [{ title: { contains: search } }, { address: { contains: search } }],
     }),
@@ -89,6 +90,7 @@ export async function getDonors(query: ListDonorsQueryInput) {
       skip: (page - 1) * limit,
       take: limit,
       orderBy: [
+        { rank: "asc" },
         { bloodDonations: "desc" },
         { plasmaDonations: "desc" },
         { title: "asc" },
@@ -98,7 +100,10 @@ export async function getDonors(query: ListDonorsQueryInput) {
   ]);
 
   return {
-    items,
+    items: items.map((item) => ({
+      ...item,
+      rank: item.rank as PartnerRank,
+    })),
     total,
     page,
     limit,

@@ -1,0 +1,19 @@
+нужно сделать:
+    - страницу регистрации (https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=308-53&t=wterLOnedpbV0Xnk-4 - десктоп, https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=321-657&t=wterLOnedpbV0Xnk-4 - мобила)
+    - страницу входа (https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=308-810&t=wterLOnedpbV0Xnk-4 - десктоп, https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=323-1565&t=wterLOnedpbV0Xnk-4 - мобила)
+    - форму проверки наличия крови на главной странице (https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=363-1256&t=wterLOnedpbV0Xnk-4 - десктоп, https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=379-8505&t=wterLOnedpbV0Xnk-4 - мобилка)
+    - страницу партнерства (https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=115-989&t=wterLOnedpbV0Xnk-4 - десктоп, https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=316-138&t=wterLOnedpbV0Xnk-4 - мобилка)
+    - страницу аккаунта для клиники (https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=374-5245&t=wterLOnedpbV0Xnk-4 - десктоп, https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=377-7764&t=wterLOnedpbV0Xnk-4 - мобилка)
+    - страницу аккаунта для пользователя (https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=325-2268&t=wterLOnedpbV0Xnk-4 - десктоп, https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=326-3935&t=wterLOnedpbV0Xnk-4 - мобилка)
+    - страницу поиска крови (https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=361-465&t=wterLOnedpbV0Xnk-4 - десктоп, https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=376-6539&t=wterLOnedpbV0Xnk-4 - мобилка)
+    - страницу тарифов - (https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=371-4876&t=wterLOnedpbV0Xnk-4 - десткоп, https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=376-7169&t=wterLOnedpbV0Xnk-4 - мобилка)
+    - страницу успешной оплаты тарифа - (https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=374-5047&t=wterLOnedpbV0Xnk-4 - десктоп, https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=377-7615&t=wterLOnedpbV0Xnk-4 - мобилка)
+    - модалка после отправки запроса в форме проверки наличия крови на главной странице, если хотя бы 1 клиника найдена (https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=363-1573&t=wterLOnedpbV0Xnk-4 - десктоп, https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=376-7049&t=wterLOnedpbV0Xnk-4 - мобилка)
+    - модалка после отправки запроса в форме проверки наличия крови на главной странице, если ни одной клиники не найдено (https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=369-4844&t=wterLOnedpbV0Xnk-4 - десктоп, https://www.figma.com/design/ELfwAXvhHBbJGy2QDemD2T/%D0%92%D0%9A%D0%A0?node-id=376-7139&t=wterLOnedpbV0Xnk-4 - мобилка)
+
+важные моменты:
+    - покупка тарифа должна быть фейковой, при нажатии на кнопку покупки пользователя перекидывает на кнопку успешной оплаты и выдаются все необходимые разрешения (доступ к странице поиска крови)
+    - заполнение информации о животном в личном кабинете пользователя не несет за собой бизнес-логики, так надо
+    - аккаунт клиники регистрируется путем ручного запроса, затем клинике выдаются данными и с ними она уже регистрируется на платформе
+
+если что-то непонятно - спрашивай. можешь разбить задачу на несколько итераций, если тебе так будет проще

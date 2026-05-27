@@ -1,3 +1,4 @@
+import { PartnerRank } from "@dobrokot/shared";
 import { Badge } from "@/shared/ui";
 import { ResultCard } from "./ui/ResultCard";
 
@@ -5,6 +6,7 @@ const results = [
   {
     title: "VetCity",
     description: "Ветеринарная клиника",
+    rank: PartnerRank.LEGENDARY_DONOR,
     bloodCount: 18,
     plasmaCount: 6,
     img: "/partners/1_mob.png",
@@ -12,6 +14,7 @@ const results = [
   {
     title: "Animal Care",
     description: "Ветеринарная клиника",
+    rank: PartnerRank.RELIABLE_ASSISTANT,
     bloodCount: 12,
     plasmaCount: 7,
     img: "/partners/2_mob.png",
@@ -19,6 +22,7 @@ const results = [
   {
     title: "Pet Help Center",
     description: "Ветеринарная клиника",
+    rank: PartnerRank.LEGENDARY_DONOR,
     bloodCount: 22,
     plasmaCount: 9,
     img: "/partners/3_mob.png",
@@ -26,6 +30,7 @@ const results = [
   {
     title: "GoodVet",
     description: "Ветеринарная клиника",
+    rank: PartnerRank.RELIABLE_ASSISTANT,
     bloodCount: 10,
     plasmaCount: 5,
     img: "/partners/4_mob.png",
@@ -33,6 +38,7 @@ const results = [
   {
     title: "BioVet Lab",
     description: "Ветеринарная клиника",
+    rank: PartnerRank.LEGENDARY_DONOR,
     bloodCount: 17,
     plasmaCount: 10,
     img: "/partners/5_mob.png",
@@ -40,6 +46,7 @@ const results = [
   {
     title: "CityVet Plus",
     description: "Ветеринарная клиника",
+    rank: PartnerRank.RELIABLE_ASSISTANT,
     bloodCount: 14,
     plasmaCount: 8,
     img: "/partners/1_mob.png",
@@ -47,6 +54,7 @@ const results = [
   {
     title: "North Animal Clinic",
     description: "Ветеринарная клиника",
+    rank: PartnerRank.RELIABLE_ASSISTANT,
     bloodCount: 11,
     plasmaCount: 6,
     img: "/partners/2_mob.png",
@@ -54,6 +62,7 @@ const results = [
   {
     title: "FriendVet",
     description: "Ветеринарная клиника",
+    rank: PartnerRank.LEGENDARY_DONOR,
     bloodCount: 20,
     plasmaCount: 9,
     img: "/partners/3_mob.png",
@@ -61,6 +70,7 @@ const results = [
   {
     title: "Care Point",
     description: "Ветеринарная клиника",
+    rank: PartnerRank.RELIABLE_ASSISTANT,
     bloodCount: 8,
     plasmaCount: 5,
     img: "/partners/4_mob.png",
@@ -69,7 +79,7 @@ const results = [
 
 function ResultsPage() {
   return (
-    <main className="flex flex-col gap-3 sm:gap-15 pb-5 sm:pb-15 rounded-t-3xl bg-background pt-5 sm:mx-auto sm:max-w-[calc(100%-16px)]">
+    <main className="flex flex-col gap-3 sm:px-8 sm:gap-15 pb-5 sm:pb-15 rounded-t-3xl bg-background pt-5 sm:mx-auto sm:max-w-[calc(100%-16px)]">
       <div className="flex flex-col items-center gap-2.5 text-center">
         <div className="flex flex-col items-center">
           <Badge>Донорство</Badge>
@@ -88,6 +98,7 @@ function ResultsPage() {
             img={result.img}
             title={result.title}
             description={result.description}
+            rank={result.rank}
             bloodCount={result.bloodCount}
             plasmaCount={result.plasmaCount}
           />

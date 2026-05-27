@@ -31,7 +31,11 @@ function getMySqlConfig() {
   }
 
   const query = parsedUrl.searchParams;
-  const host = process.env.DATABASE_HOST || parsedUrl.hostname;
+  const rawHost = process.env.DATABASE_HOST || parsedUrl.hostname;
+  // On Windows, "localhost" resolves to IPv6 (::1) first; MySQL/MariaDB containers
+  // and most local installs only listen on IPv4, leading to EACCES ::1:3306.
+  // Pin to 127.0.0.1 so the driver opens IPv4 sockets.
+  const host = rawHost === "localhost" ? "127.0.0.1" : rawHost;
   const isLocalDatabaseHost = ["localhost", "127.0.0.1", "::1", "mysql"].includes(host);
   const database = process.env.DATABASE_NAME || parsedUrl.pathname.replace(/^\//, "");
   if (!database) {
@@ -51,6 +55,10 @@ function getMySqlConfig() {
         "10000",
       10,
     ),
+    // Cyrillic strings get stored as U+FFFD when the driver negotiates a non-UTF-8
+    // collation (default behavior depends on server locale). Pin to utf8mb4.
+    charset: "utf8mb4",
+    collation: "utf8mb4_unicode_ci",
     allowPublicKeyRetrieval: parseBoolean(
       process.env.DATABASE_ALLOW_PUBLIC_KEY_RETRIEVAL ??
         query.get("allowPublicKeyRetrieval"),

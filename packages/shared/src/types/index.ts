@@ -106,6 +106,7 @@ export interface Donor {
   imageUrl: string;
   title: string;
   address: string;
+  rank: PartnerRank;
   bloodDonations: number;
   plasmaDonations: number;
 }

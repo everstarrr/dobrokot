@@ -1,5 +1,6 @@
 ﻿import { AboutUsSection } from "./ui/AboutUsSection";
 import { ArticlesSection } from "./ui/ArticlesSection";
+import { BloodCheckSection } from "./ui/BloodCheckSection";
 import { HeroSection } from "./ui/HeroSection";
 import { HeroSectionDesktop } from "./ui/HeroSectionDesktop";
 import { HowItWorksSection } from "./ui/HowItWorksSection";
@@ -13,6 +14,7 @@ function MainPage() {
 
       <AboutUsSection />
       <HowItWorksSection />
+      <BloodCheckSection />
       <PartnersSection />
       <ArticlesSection />
     </main>

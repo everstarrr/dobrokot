@@ -5,10 +5,17 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/app/shared/lib/utils";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/features/auth/useAuth";
 
 export const Footer = () => {
 
   const pathname = usePathname();
+  const { isAuthenticated, plan } = useAuth();
+  const findDonorHref = !isAuthenticated
+    ? "/signup"
+    : plan
+      ? "/blood-search"
+      : "/plans";
 
   return (
     <footer className={cn("bg-foreground text-white flex flex-col gap-5 sm:gap-0 items-center rounded-3xl relative sm:w-[calc(100%-16px)] mx-auto sm:mb-2", pathname !== "/" && "sm:border-8 sm:border-background rounded-t-none")}>
@@ -81,12 +88,16 @@ export const Footer = () => {
         </div>
       </div>
       <div className="bg-accent-orange py-4 px-2 flex w-full sm:justify-center">
-        <Button variant="outlineWhite" className="max-sm:flex-1">
-          Найти донора
-        </Button>
-        <Button variant="outlineWhite" size="icon">
-          <ArrowRight />
-        </Button>
+        <Link href={findDonorHref} className="max-sm:flex-1">
+          <Button variant="outlineWhite" className="w-full">
+            Найти донора
+          </Button>
+        </Link>
+        <Link href={findDonorHref}>
+          <Button variant="outlineWhite" size="icon">
+            <ArrowRight />
+          </Button>
+        </Link>
       </div>
       <div className="rounded-b-3xl py-8 sm:px-15 w-full text-center sm:text-left">
         © 2026 dobrokot.com

@@ -78,7 +78,7 @@ const articles = [
 
 function BlogPage() {
   return (
-    <main className="flex flex-col gap-5 sm:gap-15 rounded-t-3xl bg-background pt-5 sm:max-w-[calc(100%-16px)] sm:mx-auto">
+    <main className="flex flex-col gap-5 sm:px-8 sm:gap-15 rounded-t-3xl bg-background pt-5 sm:max-w-[calc(100%-16px)] sm:mx-auto">
       <div className="flex flex-col items-center gap-2.5 text-center">
         <div className="flex flex-col items-center">
           <Badge>Блог</Badge>

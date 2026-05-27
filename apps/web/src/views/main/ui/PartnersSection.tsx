@@ -27,7 +27,7 @@ const partners = [
 
 export const PartnersSection = () => {
   return (
-    <section className="flex flex-col items-center gap-5 sm:gap-7.5 py-5 sm:py-10 max-w-8xl mx-auto">
+    <section className="flex flex-col items-center gap-5 sm:gap-7.5 py-5 sm:py-10 w-full min-w-0 max-w-8xl mx-auto">
       <div className="flex flex-col items-center gap-2.5 text-center">
         <h2 className="text-4xl sm:text-[45px] font-semibold text-typography">Партнёры</h2>
         <p className="text-typography text-sm">

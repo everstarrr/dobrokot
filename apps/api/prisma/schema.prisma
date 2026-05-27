@@ -92,15 +92,17 @@ enum PartnerType {
 }
 
 model Donor {
-  id              String @id @default(uuid())
-  imageUrl        String @map("image_url") @db.VarChar(2048)
+  id              String      @id @default(uuid())
+  imageUrl        String      @map("image_url") @db.VarChar(2048)
   title           String
   address         String
-  bloodDonations  Int    @map("blood_donations")
-  plasmaDonations Int    @map("plasma_donations")
+  rank            PartnerRank @default(RELIABLE_ASSISTANT)
+  bloodDonations  Int         @map("blood_donations")
+  plasmaDonations Int         @map("plasma_donations")
 
   @@index([title])
   @@index([address])
+  @@index([rank])
   @@map("donors")
 }
 

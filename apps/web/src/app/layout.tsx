@@ -32,9 +32,11 @@ export default function RootLayout({
         <Providers>
           <BodyBackgroundController />
           <Header />
-          {children}
-          <QuestionsForm />
-          <Footer />
+          <div className="mx-auto w-full max-w-8xl">
+            {children}
+            <QuestionsForm />
+            <Footer />
+          </div>
         </Providers>
       </body>
     </html>

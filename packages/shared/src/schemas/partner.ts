@@ -36,6 +36,7 @@ export const createDonorSchema = z.object({
   imageUrl: z.string().trim().min(1).max(2048),
   title: z.string().trim().min(1).max(191),
   address: z.string().trim().min(1).max(191),
+  rank: partnerRankSchema.optional(),
   bloodDonations: nonNegativeInt,
   plasmaDonations: nonNegativeInt,
 });
@@ -47,6 +48,7 @@ export const donorIdParamSchema = z.object({
 });
 
 export const listDonorsQuerySchema = z.object({
+  rank: partnerRankSchema.optional(),
   search: optionalSearch,
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(10),

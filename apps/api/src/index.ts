@@ -11,7 +11,35 @@ const app: Express = express();
 
 // Middleware
 app.use(helmet());
-app.use(cors({ origin: config.corsOrigin, credentials: true }));
+
+const allowedOrigins = new Set(
+  config.corsOrigin.split(",").map((value) => value.trim()).filter(Boolean),
+);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      if (allowedOrigins.has(origin)) {
+        callback(null, true);
+        return;
+      }
+      // In dev allow any localhost port (3000, 3001, 3002, …) for convenience
+      if (
+        config.nodeEnv !== "production" &&
+        /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+      ) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    },
+    credentials: true,
+  }),
+);
 app.use(morgan(config.nodeEnv === "production" ? "combined" : "dev"));
 app.use(express.json({ limit: "1mb" }));
 
