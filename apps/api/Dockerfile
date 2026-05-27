@@ -38,6 +38,9 @@ COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
 COPY --from=builder /app/apps/api/prisma.config.ts ./apps/api/
 COPY --from=builder /app/apps/api/package.json ./apps/api/
+# pnpm installs devDeps (incl. `prisma` CLI) into the workspace package's own
+# node_modules; the runner needs it to run `prisma migrate deploy`.
+COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=builder /app/packages/shared ./packages/shared
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./

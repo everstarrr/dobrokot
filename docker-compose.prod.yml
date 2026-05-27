@@ -29,7 +29,7 @@ services:
     # `pnpm install` and fails with EACCES on /app.
     working_dir: /app/apps/api
     command:
-      - /app/node_modules/.bin/prisma
+      - /app/apps/api/node_modules/.bin/prisma
       - migrate
       - deploy
       - --config
