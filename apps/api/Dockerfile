@@ -18,6 +18,11 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
 COPY . .
+
+# `prisma generate` evaluates env("DATABASE_URL") from prisma.config.ts at load
+# time; pass a placeholder so the generator runs (no DB connection is opened).
+# The real DATABASE_URL is injected at runtime via .env.production / compose.
+ENV DATABASE_URL="mysql://placeholder:placeholder@placeholder:3306/placeholder"
 RUN pnpm --filter @dobrokot/api db:generate
 RUN pnpm --filter @dobrokot/api build
 
