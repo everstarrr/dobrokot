@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PartnershipRequestStatus } from "../types/index.js";
+import { PartnershipRequestStatus } from "../types";
 
 export { PartnershipRequestStatus };
 

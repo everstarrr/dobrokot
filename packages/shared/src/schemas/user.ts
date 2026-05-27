@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { UserRole } from "../types/index.js";
+import { UserRole } from "../types";
 
 export { UserRole };
 

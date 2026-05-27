@@ -11,7 +11,7 @@ COPY apps/api/package.json ./apps/api/
 COPY packages/shared/package.json ./packages/shared/
 RUN pnpm install --frozen-lockfile
 
-# --- Build ---
+# --- Build (only generates Prisma client; api itself runs from TS via tsx) ---
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
@@ -24,7 +24,6 @@ COPY . .
 # The real DATABASE_URL is injected at runtime via .env.production / compose.
 ENV DATABASE_URL="mysql://placeholder:placeholder@placeholder:3306/placeholder"
 RUN pnpm --filter @dobrokot/api db:generate
-RUN pnpm --filter @dobrokot/api build
 
 # --- Runner ---
 FROM base AS runner
@@ -34,12 +33,15 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 api
 
-COPY --from=builder /app/apps/api/dist ./apps/api/dist
+# Source TS, Prisma generated client, schema, config — run via tsx (same as dev)
+# to avoid the dev/prod divergence around .ts imports of @dobrokot/shared.
+COPY --from=builder /app/apps/api/src ./apps/api/src
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
 COPY --from=builder /app/apps/api/prisma.config.ts ./apps/api/
+COPY --from=builder /app/apps/api/tsconfig.json ./apps/api/
 COPY --from=builder /app/apps/api/package.json ./apps/api/
-# pnpm installs devDeps (incl. `prisma` CLI) into the workspace package's own
-# node_modules; the runner needs it to run `prisma migrate deploy`.
+# pnpm installs devDeps (incl. `prisma` CLI, `tsx`) into the workspace package's
+# own node_modules; the runner needs them at runtime.
 COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=builder /app/packages/shared ./packages/shared
 COPY --from=builder /app/node_modules ./node_modules
@@ -48,4 +50,4 @@ COPY --from=builder /app/package.json ./
 USER api
 
 EXPOSE 4000
-CMD ["node", "apps/api/dist/index.js"]
+CMD ["/app/apps/api/node_modules/.bin/tsx", "/app/apps/api/src/index.ts"]

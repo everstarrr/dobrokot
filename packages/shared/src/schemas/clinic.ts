@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ClinicVerificationStatus } from "../types/index.js";
+import { ClinicVerificationStatus } from "../types";
 
 export { ClinicVerificationStatus };
 

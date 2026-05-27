@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { SubscriptionPlan } from "../types/index.js";
+import { SubscriptionPlan } from "../types";
 
 export { SubscriptionPlan };
 
