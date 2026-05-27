@@ -1,24 +1,52 @@
--- DropForeignKey
-ALTER TABLE `Animal` DROP FOREIGN KEY `Animal_ownerId_fkey`;
-ALTER TABLE `DonationRequest` DROP FOREIGN KEY `DonationRequest_requesterId_fkey`;
-ALTER TABLE `DonationResponse` DROP FOREIGN KEY `DonationResponse_requestId_fkey`;
-ALTER TABLE `DonationResponse` DROP FOREIGN KEY `DonationResponse_donorAnimalId_fkey`;
-ALTER TABLE `Message` DROP FOREIGN KEY `Message_senderId_fkey`;
-ALTER TABLE `Message` DROP FOREIGN KEY `Message_receiverId_fkey`;
-
--- DropTable (legacy)
+-- Defensive cleanup: legacy tables existed in older dev branches but were
+-- never created by any committed migration. IF EXISTS keeps fresh DBs happy.
 DROP TABLE IF EXISTS `DonationResponse`;
 DROP TABLE IF EXISTS `DonationRequest`;
 DROP TABLE IF EXISTS `Message`;
 DROP TABLE IF EXISTS `Animal`;
 
--- AlterTable User: subscription fields + tighten role enum
-ALTER TABLE `User`
-  ADD COLUMN `subscriptionPlan` ENUM('WEEK','MONTH') NULL,
-  ADD COLUMN `subscriptionExpiresAt` DATETIME(3) NULL,
-  MODIFY `role` ENUM('OWNER','CLINIC','ADMIN') NOT NULL DEFAULT 'OWNER';
+-- CreateTable User
+CREATE TABLE IF NOT EXISTS `User` (
+  `id` VARCHAR(191) NOT NULL,
+  `email` VARCHAR(191) NOT NULL,
+  `passwordHash` VARCHAR(191) NOT NULL,
+  `name` VARCHAR(191) NOT NULL,
+  `phone` VARCHAR(191) NULL,
+  `role` ENUM('OWNER','CLINIC','ADMIN') NOT NULL DEFAULT 'OWNER',
+  `city` VARCHAR(191) NULL,
+  `latitude` DOUBLE NULL,
+  `longitude` DOUBLE NULL,
+  `avatarUrl` VARCHAR(191) NULL,
+  `isVerified` BOOLEAN NOT NULL DEFAULT false,
+  `subscriptionPlan` ENUM('WEEK','MONTH') NULL,
+  `subscriptionExpiresAt` DATETIME(3) NULL,
+  `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updatedAt` DATETIME(3) NOT NULL,
 
-CREATE INDEX `User_subscriptionExpiresAt_idx` ON `User`(`subscriptionExpiresAt`);
+  UNIQUE INDEX `User_email_key`(`email`),
+  INDEX `User_city_idx`(`city`),
+  INDEX `User_role_idx`(`role`),
+  INDEX `User_subscriptionExpiresAt_idx`(`subscriptionExpiresAt`),
+  PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable RefreshToken
+CREATE TABLE IF NOT EXISTS `RefreshToken` (
+  `id` VARCHAR(191) NOT NULL,
+  `token` VARCHAR(500) NOT NULL,
+  `userId` VARCHAR(191) NOT NULL,
+  `expiresAt` DATETIME(3) NOT NULL,
+  `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+  UNIQUE INDEX `RefreshToken_token_key`(`token`),
+  INDEX `RefreshToken_userId_idx`(`userId`),
+  INDEX `RefreshToken_expiresAt_idx`(`expiresAt`),
+  PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+ALTER TABLE `RefreshToken`
+  ADD CONSTRAINT `RefreshToken_userId_fkey`
+  FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- CreateTable Clinic
 CREATE TABLE `Clinic` (
