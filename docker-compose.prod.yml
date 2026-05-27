@@ -24,7 +24,16 @@ services:
       - .env.production
     environment:
       NODE_ENV: production
-    command: ["pnpm", "--filter", "@dobrokot/api", "db:deploy"]
+    # Call Prisma directly — the runner image has no pnpm-workspace.yaml and
+    # runs as a non-root user, so `pnpm --filter ...` ends up trying to
+    # `pnpm install` and fails with EACCES on /app.
+    working_dir: /app/apps/api
+    command:
+      - /app/node_modules/.bin/prisma
+      - migrate
+      - deploy
+      - --config
+      - prisma.config.ts
     depends_on:
       mysql:
         condition: service_healthy
