@@ -4,7 +4,7 @@ import {
   BloodInventoryStatus,
   CatBloodType,
   DogBloodType,
-} from "../types";
+} from "../types/index.js";
 
 export { AnimalType, BloodInventoryStatus, CatBloodType, DogBloodType };
 

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PartnerRank, PartnerType } from "../types";
+import { PartnerRank, PartnerType } from "../types/index.js";
 
 export { PartnerRank, PartnerType };
 
