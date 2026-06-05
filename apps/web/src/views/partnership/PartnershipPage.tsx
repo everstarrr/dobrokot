@@ -6,6 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 import { Badge } from "@/shared/ui";
 import { PartnersSection } from "@/views/main/ui/PartnersSection";
 import { PartnershipForm } from "./ui/PartnershipForm";
+import Link from "next/link";
 
 type ActionCard = {
   id: string;
@@ -83,9 +84,8 @@ function PartnershipPage() {
             Предложить сотрудничество
           </span>
         </button>
-        <button
-          type="button"
-          onClick={openForm}
+        <Link
+          href="/results"
           className={`group relative overflow-hidden rounded-3xl bg-secondary text-left sm:col-span-1 sm:row-span-1 aspect-square`}
         >
           <Image
@@ -104,7 +104,7 @@ function PartnershipPage() {
           <span className="absolute inset-x-5 bottom-5 text-white text-xl sm:text-2xl font-medium drop-shadow-lg">
             Список партнеров, кто уже с нами
           </span>
-        </button>
+        </Link>
 
         <div className="relative overflow-hidden rounded-3xl bg-secondary sm:col-span-2 sm:row-span-2 aspect-5/4 sm:aspect-auto">
           <Image

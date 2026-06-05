@@ -12,7 +12,10 @@ export const QuestionsForm = () => {
   }
 
   return (
-    <section className="py-10 flex flex-col items-center gap-7.5 bg-background sm:max-w-[calc(100%-16px)] sm:mx-auto">
+    <section
+      id="questions-form"
+      className="scroll-mt-28 py-10 flex flex-col items-center gap-7.5 bg-background sm:max-w-[calc(100%-16px)] sm:mx-auto"
+    >
       <div className="flex flex-col gap-2.5 text-center">
         <h2 className="text-4xl font-semibold text-typography">
           Остались вопросы?

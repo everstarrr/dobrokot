@@ -33,7 +33,7 @@ export const Header = () => {
       ? "/blood-search"
       : "/plans";
 
-  const orangeBg = !isHome || isAuthenticated;
+  const orangeBg = !isHome;
 
   const navLinks = hasPlan
     ? [...baseLinks, { href: "/blood-search", label: "Поиск крови" }]

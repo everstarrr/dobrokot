@@ -1,7 +1,15 @@
+"use client";
+
 import { Button } from "@/shared/ui";
 import { Badge } from "@/shared/ui/badge";
 import { ArrowDownRight } from "lucide-react";
 import Image from "next/image";
+
+const scrollToQuestions = () => {
+  document
+    .getElementById("questions-form")
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+};
 
 export const HeroSection = () => {
   return (
@@ -56,8 +64,10 @@ export const HeroSection = () => {
           </div>
         </div>
         <div className="flex mt-auto">
-          <Button variant="white">Стать донором</Button>
-          <Button variant="white" size="icon">
+          <Button variant="white" onClick={scrollToQuestions}>
+            Стать донором
+          </Button>
+          <Button variant="white" size="icon" onClick={scrollToQuestions}>
             <ArrowDownRight />
           </Button>
         </div>
