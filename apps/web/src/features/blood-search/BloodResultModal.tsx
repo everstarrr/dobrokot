@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button, Modal } from "@/shared/ui";
+import { useAuth } from "@/features/auth/useAuth";
 
 type Variant = "found" | "not-found";
 
@@ -15,6 +16,14 @@ type Props = {
 
 export const BloodResultModal = ({ open, onClose, variant, matchCount = 12 }: Props) => {
   const isFound = variant === "found";
+  const { isAuthenticated, plan } = useAuth();
+  // Anonymous → регистрация; авторизован без тарифа → к тарифам;
+  // авторизован с активной подпиской → сразу к выдаче клиник.
+  const targetHref = !isAuthenticated
+    ? "/signup"
+    : plan
+      ? "/blood-search"
+      : "/plans";
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -36,7 +45,7 @@ export const BloodResultModal = ({ open, onClose, variant, matchCount = 12 }: Pr
               <p className="text-foreground/70 text-sm sm:text-base">
                 Готовы поделиться с Вами контактами прямо сейчас!
               </p>
-              <Link href="/blood-search" className="mt-auto">
+              <Link href={targetHref} className="mt-auto">
                 <Button className="w-full" onClick={onClose}>
                   Посмотреть клиники
                 </Button>

@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { ArrowUpRight, Droplet } from "lucide-react";
@@ -88,11 +89,27 @@ const ClinicCard = ({ row }: { row: BloodSearchClinicResult }) => (
 );
 
 export function BloodSearchPage() {
+  const router = useRouter();
   const auth = useAuth();
   const [data, setData] = useState<PaginatedResponse<BloodSearchClinicResult> | null>(
     null,
   );
   const [filtersApplied, setFiltersApplied] = useState(false);
+
+  useEffect(() => {
+    if (!auth.hydrated) return;
+    if (!auth.isAuthenticated) {
+      router.replace("/signup");
+    }
+  }, [auth.hydrated, auth.isAuthenticated, router]);
+
+  if (!auth.hydrated || !auth.isAuthenticated) {
+    return (
+      <main className="flex flex-col items-center justify-center min-h-[40vh] gap-3 text-foreground/70">
+        <p className="text-sm">Проверяем доступ…</p>
+      </main>
+    );
+  }
 
   const mutation = useMutation({
     mutationFn: searchBlood,
