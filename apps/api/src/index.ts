@@ -60,9 +60,22 @@ async function main() {
     await prisma.$connect();
     console.log("✓ Database connected");
 
-    app.listen(config.port, () => {
+    const server = app.listen(config.port, () => {
       console.log(`✓ Server running on port ${config.port}`);
     });
+
+    // Graceful shutdown so `tsx watch` reloads (and prod SIGTERM) release the
+    // Prisma connection pool — otherwise old "Sleep" sessions linger on MySQL
+    // and starve the connection limit, surfacing as intermittent pool timeouts.
+    const shutdown = async (signal: NodeJS.Signals) => {
+      console.log(`Received ${signal}, shutting down...`);
+      server.close();
+      await prisma.$disconnect().catch(() => {});
+      process.exit(0);
+    };
+    process.once("SIGINT", shutdown);
+    process.once("SIGTERM", shutdown);
+    process.once("SIGUSR2", shutdown); // tsx watch sends SIGUSR2 on reload
   } catch (error) {
     console.error("Failed to start server:", error);
     process.exit(1);

@@ -1,6 +1,16 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { Button, Checkbox, Input } from "../ui";
 
+const ALLOWED_PATHS = new Set(["/", "/blog", "/results", "/map", "/partnership"]);
+
 export const QuestionsForm = () => {
+  const pathname = usePathname();
+  if (!ALLOWED_PATHS.has(pathname)) {
+    return null;
+  }
+
   return (
     <section className="py-10 flex flex-col items-center gap-7.5 bg-background sm:max-w-[calc(100%-16px)] sm:mx-auto">
       <div className="flex flex-col gap-2.5 text-center">

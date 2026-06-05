@@ -264,14 +264,15 @@ curl http://127.0.0.1:4000/health
 
 ## 3. Reverse proxy (Nginx)
 
-Поставить Nginx + certbot на хост, добавить два vhost-а:
+**Важно**: пишем конфиг сначала **только на 80 порту** (HTTPS блоки добавит
+certbot после выпуска сертификата). Если сразу указать `listen 443 ssl` без
+`ssl_certificate`, nginx упадёт с `no "ssl_certificate" is defined`.
 
 ```nginx
 # /etc/nginx/sites-available/dobrokot
 server {
-    listen 443 ssl http2;
+    listen 80;
     server_name dobrokot.ru;
-    # ... ssl_certificate / ssl_certificate_key (certbot) ...
 
     location / {
         proxy_pass http://127.0.0.1:3000;
@@ -283,9 +284,8 @@ server {
 }
 
 server {
-    listen 443 ssl http2;
+    listen 80;
     server_name api.dobrokot.ru;
-    # ... ssl_certificate / ssl_certificate_key ...
 
     client_max_body_size 2m;          # под лимит express.json
     location / {
@@ -301,7 +301,14 @@ server {
 ```bash
 ln -s /etc/nginx/sites-available/dobrokot /etc/nginx/sites-enabled/
 nginx -t && systemctl reload nginx
-certbot --nginx -d dobrokot.ru -d api.dobrokot.ru
+
+# DNS обоих доменов должен уже указывать на этот сервер — проверь:
+curl -I http://dobrokot.ru
+curl -I http://api.dobrokot.ru
+
+# Выпуск SSL: certbot сам допишет `listen 443 ssl` блоки и редирект 80 → 443
+certbot --nginx -d dobrokot.ru -d api.dobrokot.ru \
+        --redirect --agree-tos -m admin@dobrokot.ru --no-eff-email
 ```
 
 ---
