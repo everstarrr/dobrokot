@@ -2,13 +2,17 @@
 
 import {
   AnimalType,
+  BloodProductType,
   CatBloodType,
   DogBloodType,
+  PlasmaSubtype,
   type BloodCheckInput,
   type BloodSearchClinicResult,
   type PaginatedResponse,
 } from "@dobrokot/shared";
 import { apiClient, unwrapApiResponse } from "./http";
+
+export { BloodProductType, PlasmaSubtype };
 
 export type BloodCheckResult = {
   available: boolean;
@@ -19,6 +23,8 @@ export type BloodCheckResult = {
 export type BloodSearchInputClient = {
   animalType: AnimalType;
   bloodType?: string;
+  productType: BloodProductType;
+  plasmaSubtype?: PlasmaSubtype;
   city?: string;
   latitude?: number;
   longitude?: number;
@@ -42,6 +48,12 @@ export async function searchBlood(
   });
   return unwrapApiResponse<PaginatedResponse<BloodSearchClinicResult>>(response);
 }
+
+export const plasmaSubtypeOptions: { value: PlasmaSubtype; label: string }[] = [
+  { value: PlasmaSubtype.FFP, label: "FFP — свежезамороженная" },
+  { value: PlasmaSubtype.FP, label: "FP — замороженная" },
+  { value: PlasmaSubtype.CRYO, label: "Криопреципитат" },
+];
 
 export const bloodTypeOptionsByAnimal: Record<
   AnimalType,

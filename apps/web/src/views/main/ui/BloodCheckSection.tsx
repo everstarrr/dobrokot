@@ -62,6 +62,8 @@ export const BloodCheckSection = () => {
               await mutation.mutateAsync({
                 animalType: values.animalType,
                 bloodType: values.bloodType,
+                productType: values.productType,
+                plasmaSubtype: values.plasmaSubtype || undefined,
               });
             }}
           />

@@ -47,6 +47,27 @@ export enum BloodInventoryStatus {
   EXPIRED = "EXPIRED",
 }
 
+export enum BloodProductType {
+  BLOOD = "BLOOD",
+  PLASMA = "PLASMA",
+}
+
+/**
+ * Подтипы плазмы. Запрашиваются раздельно в ветпрактике:
+ * - FFP (Fresh Frozen Plasma) — свежезамороженная, заморожена в течение 8 часов,
+ *   содержит все факторы свёртывания. Используется при коагулопатиях.
+ * - FP (Frozen Plasma) — замороженная без жёстких ограничений по сроку,
+ *   теряет часть лабильных факторов. Используется при гипопротеинемии.
+ * - CRYO (Cryoprecipitate) — криопреципитат, концентрат фактора VIII,
+ *   фактора фон Виллебранда и фибриногена. Применяется при von Willebrand и
+ *   некоторых формах гемофилии.
+ */
+export enum PlasmaSubtype {
+  FFP = "FFP",
+  FP = "FP",
+  CRYO = "CRYO",
+}
+
 export enum ClinicVerificationStatus {
   PENDING = "PENDING",
   VERIFIED = "VERIFIED",
@@ -143,6 +164,8 @@ export interface BloodInventoryPublic {
   clinicId: string;
   animalType: AnimalType;
   bloodType: string;
+  productType: BloodProductType;
+  plasmaSubtype: PlasmaSubtype | null;
   volumeMl: number | null;
   unitsCount: number;
   donationDate: string | null;
@@ -153,6 +176,8 @@ export interface BloodInventoryPublic {
 
 export interface BloodSearchClinicResult {
   clinic: ClinicPublic;
+  productType: BloodProductType;
+  plasmaSubtype: PlasmaSubtype | null;
   matchedUnits: number;
   totalVolumeMl: number;
   distanceKm: number | null;

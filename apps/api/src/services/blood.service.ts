@@ -2,7 +2,9 @@ import { prisma } from "../lib/prisma";
 import { AppError } from "../middleware/errorHandler";
 import {
   BloodInventoryStatus,
+  BloodProductType,
   ClinicVerificationStatus,
+  PlasmaSubtype,
   type BloodCheckInput,
   type BloodSearchInput,
 } from "@dobrokot/shared";
@@ -51,6 +53,8 @@ export async function searchClinicsWithBlood(input: BloodSearchInput) {
   };
   type Agg = {
     clinic: ClinicRow;
+    productType: BloodProductType;
+    plasmaSubtype: PlasmaSubtype | null;
     matchedUnits: number;
     totalVolumeMl: number;
   };
@@ -64,6 +68,8 @@ export async function searchClinicsWithBlood(input: BloodSearchInput) {
     } else {
       aggMap.set(item.clinicId, {
         clinic: item.clinic,
+        productType: item.productType as BloodProductType,
+        plasmaSubtype: (item.plasmaSubtype as PlasmaSubtype | null) ?? null,
         matchedUnits: item.unitsCount,
         totalVolumeMl: item.volumeMl ?? 0,
       });
@@ -98,6 +104,8 @@ export async function searchClinicsWithBlood(input: BloodSearchInput) {
   return {
     items: paginated.map((r) => ({
       clinic: serializeClinic(r.clinic),
+      productType: r.productType,
+      plasmaSubtype: r.plasmaSubtype,
       matchedUnits: r.matchedUnits,
       totalVolumeMl: r.totalVolumeMl,
       distanceKm: r.distanceKm,
@@ -127,12 +135,19 @@ export async function getClinicPublicInventory(clinicId: string) {
     orderBy: [{ animalType: "asc" }, { bloodType: "asc" }],
   });
 
-  const groups = new Map<
-    string,
-    { animalType: string; bloodType: string; unitsCount: number; totalVolumeMl: number }
-  >();
+  type InventoryGroup = {
+    animalType: string;
+    bloodType: string;
+    productType: BloodProductType;
+    plasmaSubtype: PlasmaSubtype | null;
+    unitsCount: number;
+    totalVolumeMl: number;
+  };
+
+  const groups = new Map<string, InventoryGroup>();
   for (const it of items) {
-    const key = `${it.animalType}:${it.bloodType}`;
+    const subtype = (it.plasmaSubtype as PlasmaSubtype | null) ?? null;
+    const key = `${it.animalType}:${it.bloodType}:${it.productType}:${subtype ?? ""}`;
     const g = groups.get(key);
     if (g) {
       g.unitsCount += it.unitsCount;
@@ -141,6 +156,8 @@ export async function getClinicPublicInventory(clinicId: string) {
       groups.set(key, {
         animalType: it.animalType,
         bloodType: it.bloodType,
+        productType: it.productType as BloodProductType,
+        plasmaSubtype: subtype,
         unitsCount: it.unitsCount,
         totalVolumeMl: it.volumeMl ?? 0,
       });
@@ -154,6 +171,8 @@ function buildInventoryWhere(input: BloodCheckInput) {
   return {
     animalType: input.animalType,
     ...(input.bloodType ? { bloodType: input.bloodType } : {}),
+    productType: input.productType,
+    ...(input.plasmaSubtype ? { plasmaSubtype: input.plasmaSubtype } : {}),
     status: BloodInventoryStatus.AVAILABLE,
     OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
   };

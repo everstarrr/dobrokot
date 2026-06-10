@@ -9,6 +9,8 @@ import axios from "axios";
 import { ArrowUpRight, Droplet } from "lucide-react";
 import {
   AnimalType,
+  BloodProductType,
+  PlasmaSubtype,
   type BloodSearchClinicResult,
   type PaginatedResponse,
 } from "@dobrokot/shared";
@@ -37,9 +39,24 @@ const extractApiError = (
   };
 };
 
+const plasmaSubtypeLabel: Record<PlasmaSubtype, string> = {
+  [PlasmaSubtype.FFP]: "FFP",
+  [PlasmaSubtype.FP]: "FP",
+  [PlasmaSubtype.CRYO]: "Криопреципитат",
+};
+
 const ClinicCard = ({ row }: { row: BloodSearchClinicResult }) => (
   <article className="flex flex-col gap-4 rounded-3xl bg-white p-4">
-    <Badge className="self-start">Подходящий донор</Badge>
+    <div className="flex flex-wrap gap-2">
+      <Badge>Подходящий донор</Badge>
+      <Badge variant={row.productType === BloodProductType.PLASMA ? "sky" : "biege"}>
+        {row.productType === BloodProductType.PLASMA
+          ? row.plasmaSubtype
+            ? `Плазма · ${plasmaSubtypeLabel[row.plasmaSubtype]}`
+            : "Плазма"
+          : "Кровь"}
+      </Badge>
+    </div>
     <div className="flex h-28 items-center justify-center">
       {row.clinic.avatarUrl ? (
         <Image
@@ -123,6 +140,8 @@ export function BloodSearchPage() {
     await mutation.mutateAsync({
       animalType: values.animalType,
       bloodType: values.bloodType,
+      productType: values.productType,
+      plasmaSubtype: values.plasmaSubtype || undefined,
     });
   };
 

@@ -143,23 +143,25 @@ enum ClinicVerificationStatus {
 // ─── Blood Inventory ─────────────────────────────────────
 
 model BloodInventory {
-  id           String               @id @default(uuid())
-  clinicId     String
-  clinic       Clinic               @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  animalType   AnimalType
-  bloodType    String               @db.VarChar(20)
-  volumeMl     Float?
-  unitsCount   Int                  @default(1)
-  donationDate DateTime?
-  expiresAt    DateTime?
-  status       BloodInventoryStatus @default(AVAILABLE)
-  notes        String?              @db.Text
-  donorRef     String?              @db.VarChar(191)
-  createdAt    DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
+  id            String               @id @default(uuid())
+  clinicId      String
+  clinic        Clinic               @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  animalType    AnimalType
+  bloodType     String               @db.VarChar(20)
+  productType   BloodProductType     @default(BLOOD)
+  plasmaSubtype PlasmaSubtype?
+  volumeMl      Float?
+  unitsCount    Int                  @default(1)
+  donationDate  DateTime?
+  expiresAt     DateTime?
+  status        BloodInventoryStatus @default(AVAILABLE)
+  notes         String?              @db.Text
+  donorRef      String?              @db.VarChar(191)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
 
   @@index([clinicId])
-  @@index([animalType, bloodType, status])
+  @@index([animalType, bloodType, productType, status])
   @@index([expiresAt])
 }
 
@@ -168,6 +170,17 @@ enum BloodInventoryStatus {
   RESERVED
   USED
   EXPIRED
+}
+
+enum BloodProductType {
+  BLOOD
+  PLASMA
+}
+
+enum PlasmaSubtype {
+  FFP
+  FP
+  CRYO
 }
 
 // ─── Partnership Requests ────────────────────────────────
